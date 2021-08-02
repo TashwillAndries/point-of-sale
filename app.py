@@ -54,7 +54,8 @@ def init_products_table():
                      "description TEXT NOT NULL,"
                      "quantity TEXT NOT NULL,"
                      "price TEXT NOT NULL,"
-                     "type TEXT NOT NULL)")
+                     "type TEXT NOT NULL, "
+                     "total TEXT NOT NULL)")
     print("shopping table created successfully")
 
 
@@ -111,10 +112,36 @@ def products_create():
     response = {}
 
     if request.method == "POST":
+
         item_name = request.form['item_name']
         description = request.form['description']
-        price = request.form['price']
         quantity = request.form['quantity']
+        price = request.form['price']
+        type = request.form['type']
+        total = int(price) * int(quantity)
+
+        with sqlite3.connect('shopping.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO cart (item_name, description, quantity,"
+                           "price, type, total) VALUES(?, ?, ?, ?, ?, ?)", (item_name, description, quantity, price, type,
+                                                                         total))
+            conn.commit()
+            response['message'] = "item added successfully"
+            response['status_code'] = 201
+        return response
+
+
+@app.route('/get-products/', methods=['GET'])
+def get_products():
+    response = {}
+    with sqlite3.connect('shopping.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM cart")
+        carts = cursor.fetchall()
+
+    response['status_code'] = 201
+    response['data'] = carts
+    return response
 
 
 if __name__ == '__main__':
