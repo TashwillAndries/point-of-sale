@@ -12,6 +12,7 @@ class User(object):
         self.password = password
 
 
+# fetching users from the database
 def fetch_users():
     with sqlite3.connect('shopping.db') as conn:
         cursor = conn.cursor()
@@ -106,6 +107,7 @@ def user_registration():
         return response
 
 
+# protected route that creates products
 @app.route('/products-create/', methods=['POST'])
 @jwt_required()
 def products_create():
@@ -124,13 +126,14 @@ def products_create():
             cursor = conn.cursor()
             cursor.execute("INSERT INTO cart (item_name, description, quantity,"
                            "price, type, total) VALUES(?, ?, ?, ?, ?, ?)", (item_name, description, quantity, price, type,
-                                                                         total))
+                                                                            total))
             conn.commit()
             response['message'] = "item added successfully"
             response['status_code'] = 201
         return response
 
 
+# route to show all the products
 @app.route('/get-products/', methods=['GET'])
 def get_products():
     response = {}
@@ -142,6 +145,89 @@ def get_products():
     response['status_code'] = 201
     response['data'] = carts
     return response
+
+
+# route to delete a product
+@app.route("/delete-product/<int:product_id>")
+@jwt_required()
+def delete_product(product_id):
+    response = {}
+    with sqlite3.connect("shopping.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM cart WHERE product_id=" + str(product_id))
+        conn.commit()
+        response['status_code'] = 201
+        response['message'] = "product deleted successfully"
+    return response
+
+
+# route to edit products
+@app.route('/edit-product/<int:product_id>/', methods=['PUT'])
+@jwt_required()
+def edit_product(product_id):
+    response = {}
+
+    if request.method == "PUT":
+        with sqlite3.connect('shopping.db') as conn:
+            cursor = conn.cursor()
+            incoming_data = dict(request.json)
+            put_data = {}
+
+            if incoming_data.get("item_name") is not None:
+                put_data["item_name"] = incoming_data.get("item_name")
+                with sqlite3.connect('shopping.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE cart SET item_name =? WHERE product_id =?", (put_data['item_name'],
+                                                                                        product_id))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response["status_code"] = 201
+            if incoming_data.get("description") is not None:
+                put_data["description"] = incoming_data.get("description")
+                with sqlite3.connect('shopping.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE cart SET description =? WHERE product_id =?",
+                                   (put_data['description'], product_id))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response["status_code"] = 201
+            if incoming_data.get("quantity") is not None:
+                put_data["quantity"] = incoming_data.get("quantity")
+                with sqlite3.connect('shopping.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE cart SET quantity =? WHERE product_id =?",
+                                   (put_data['quantity'], product_id))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response["status_code"] = 201
+            if incoming_data.get("price") is not None:
+                put_data["price"] = incoming_data.get("price")
+                with sqlite3.connect('shopping.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE cart SET price =? WHERE product_id =?",
+                                       (put_data['price'], product_id))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response["status_code"] = 201
+            if incoming_data.get("type") is not None:
+                put_data["type"] = incoming_data.get("type")
+                with sqlite3.connect('shopping.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE cart SET type =? WHERE product_id =?",
+                                   (put_data['type'], product_id))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response["status_code"] = 201
+            if incoming_data.get("total") is not None:
+                put_data["total"] = incoming_data.get("total")
+                with sqlite3.connect('shopping.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE cart SET total =? WHERE product_id =?",
+                                   (put_data['total'], product_id))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response["status_code"] = 201
+                return response
 
 
 if __name__ == '__main__':
