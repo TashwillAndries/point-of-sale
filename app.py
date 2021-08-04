@@ -1,7 +1,8 @@
 import hmac
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_jwt import JWT, jwt_required, current_identity
+from flask_mail import Mail, Message
 import sqlite3
 
 
@@ -10,6 +11,22 @@ class User(object):
         self.id = id
         self.username = username
         self.password = password
+
+
+class Database(object):
+    def __init__(self):
+        self.conn = sqlite3.connect('shopping.db')
+        self.cursor = self.conn.cursor()
+
+    def sending_to_database(self, query, values):
+        self.cursor.execute(query, values)
+        self.conn.commit()
+
+    def single_select(self, query):
+        self.cursor.execute(query)
+
+    def fetch(self):
+        return self.cursor.fetchall()
 
 
 # fetching users from the database
@@ -80,13 +97,21 @@ def identity(payload):
 app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'this-is-a-secret'
-
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'justtotestmywork@gmail.com'
+app.config['MAIL_PASSWORD'] = 'justtesting'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 jwt = JWT(app, authenticate, identity)
 
 
+# route to register users
 @app.route('/user-registration/', methods=['POST'])
 def user_registration():
     response = {}
+    db = Database()
 
     if request.method == "POST":
 
@@ -97,14 +122,22 @@ def user_registration():
         username = request.form['username']
         password = request.form['password']
 
-        with sqlite3.connect("shopping.db") as conn:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO user (first_name,last_name,address,email,username,password) VALUES(?,?,?,?,?,?)",
-                           (first_name, surname, address, email, username, password))
-            conn.commit()
-            response["message"] = 'Success'
-            response["status_code"] = 201
+        query = "INSERT INTO user (first_name,last_name,address,email,username,password) VALUES(?,?,?,?,?,?)"
+        values = (first_name, surname, address, email, username, password)
+        db.sending_to_database(query, values)
+
+        message = Message('Thank You', sender='justtotestmywork@gmail.com', recipients=[email])
+        message.body = "Thank you for registering happy shopping"
+        mail.send(message)
+        response["message"] = 'Success'
+        response["status_code"] = 201
         return response
+
+
+@app.route('/protected')
+@jwt_required()
+def protected():
+    return '%s' % current_identity
 
 
 # protected route that creates products
@@ -112,6 +145,7 @@ def user_registration():
 @jwt_required()
 def products_create():
     response = {}
+    database = Database()
 
     if request.method == "POST":
 
@@ -122,14 +156,12 @@ def products_create():
         type = request.form['type']
         total = int(price) * int(quantity)
 
-        with sqlite3.connect('shopping.db') as conn:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO cart (item_name, description, quantity,"
-                           "price, type, total) VALUES(?, ?, ?, ?, ?, ?)", (item_name, description, quantity, price, type,
-                                                                            total))
-            conn.commit()
-            response['message'] = "item added successfully"
-            response['status_code'] = 201
+        query = "INSERT INTO cart (item_name, description, quantity,price, type, total) VALUES(?, ?, ?, ?, ?, ?)"
+        values = item_name, description, quantity, price, type, total
+
+        database.sending_to_database(query, values)
+        response['message'] = "item added successfully"
+        response['status_code'] = 201
         return response
 
 
@@ -137,27 +169,12 @@ def products_create():
 @app.route('/get-products/', methods=['GET'])
 def get_products():
     response = {}
-    with sqlite3.connect('shopping.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM cart")
-        carts = cursor.fetchall()
+    database = Database()
 
+    query = "SELECT * FROM cart"
+    database.single_select(query)
     response['status_code'] = 201
-    response['data'] = carts
-    return response
-
-
-# route to delete a product
-@app.route("/delete-product/<int:product_id>")
-@jwt_required()
-def delete_product(product_id):
-    response = {}
-    with sqlite3.connect("shopping.db") as conn:
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM cart WHERE product_id=" + str(product_id))
-        conn.commit()
-        response['status_code'] = 201
-        response['message'] = "product deleted successfully"
+    response['data'] = database.fetch()
     return response
 
 
@@ -205,7 +222,7 @@ def edit_product(product_id):
                 with sqlite3.connect('shopping.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE cart SET price =? WHERE product_id =?",
-                                       (put_data['price'], product_id))
+                                   (put_data['price'], product_id))
                     conn.commit()
                     response['message'] = "Update was successful"
                     response["status_code"] = 201
@@ -228,6 +245,35 @@ def edit_product(product_id):
                     response['message'] = "Update was successful"
                     response["status_code"] = 201
                 return response
+
+
+# route that deletes a single product
+@app.route("/delete-product/<int:product_id>")
+@jwt_required()
+def delete_post(product_id):
+    response = {}
+    database = Database()
+
+    query = "DELETE FROM cart WHERE product_id=" + str(product_id)
+    database.single_select(query)
+    response['status_code'] = 200
+    response['message'] = "product deleted successfully."
+    return response
+
+
+# route that gets a single product by its ID
+@app.route('/get-product/<int:product_id>/', methods=["GET"])
+def get_post(product_id):
+    response = {}
+    database = Database()
+
+    query = "SELECT * FROM cart WHERE product_id=" + str(product_id)
+    database.single_select(query)
+
+    response["status_code"] = 200
+    response["description"] = "product retrieved successfully"
+    response['data'] = database.fetch()
+    return response
 
 
 if __name__ == '__main__':
