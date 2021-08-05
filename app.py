@@ -1,6 +1,6 @@
 import hmac
 
-from flask import Flask, request, jsonify, render_template
+from flask import *
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_mail import Mail, Message
 import sqlite3
@@ -134,6 +134,7 @@ def user_registration():
         return response
 
 
+# protected route
 @app.route('/protected')
 @jwt_required()
 def protected():
