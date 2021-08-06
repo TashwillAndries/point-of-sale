@@ -3,6 +3,7 @@ import hmac
 from flask import *
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_mail import Mail, Message
+from smtplib import SMTPRecipientsRefused
 import sqlite3
 
 
@@ -112,25 +113,29 @@ jwt = JWT(app, authenticate, identity)
 def user_registration():
     response = {}
     db = Database()
+    try:
+        if request.method == "POST":
 
-    if request.method == "POST":
+            first_name = request.form['first_name']
+            surname = request.form['last_name']
+            address = request.form['address']
+            email = request.form['email']
+            username = request.form['username']
+            password = request.form['password']
 
-        first_name = request.form['first_name']
-        surname = request.form['last_name']
-        address = request.form['address']
-        email = request.form['email']
-        username = request.form['username']
-        password = request.form['password']
+            query = "INSERT INTO user (first_name,last_name,address,email,username,password) VALUES(?,?,?,?,?,?)"
+            values = (first_name, surname, address, email, username, password)
+            db.sending_to_database(query, values)
 
-        query = "INSERT INTO user (first_name,last_name,address,email,username,password) VALUES(?,?,?,?,?,?)"
-        values = (first_name, surname, address, email, username, password)
-        db.sending_to_database(query, values)
-
-        message = Message('Thank You', sender='justtotestmywork@gmail.com', recipients=[email])
-        message.body = "Thank you for registering happy shopping"
-        mail.send(message)
-        response["message"] = 'Success'
-        response["status_code"] = 201
+            message = Message('Thank You', sender='justtotestmywork@gmail.com', recipients=[email])
+            message.body = "Thank you for registering happy shopping"
+            mail.send(message)
+            response["message"] = 'Success'
+            response["status_code"] = 201
+            return response
+    except SMTPRecipientsRefused:
+        response['message'] = "Please enter a valid email address"
+        response['status_code'] = 400
         return response
 
 
