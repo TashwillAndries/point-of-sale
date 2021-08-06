@@ -8,7 +8,7 @@ except Exception as e:
 
 
 class Test(unittest.TestCase):
-    # check if responses is 200
+    # check if responses is 405
     def test_user_register(self):
         test = app.test_client(self)
         response = test.get('/user-registration/')
