@@ -15,12 +15,14 @@ class Test(unittest.TestCase):
         status = response.status_code
         self.assertEqual(status, 405)
 
+    # check if responses is 200
     def test_products(self):
         test = app.test_client(self)
         response = test.get('/get-products/')
         status = response.status_code
         self.assertEqual(status, 200)
 
+    # check if responses is 200
     def test_product_id(self):
         test = app.test_client(self)
         response = test.get('/get-product/3/')
