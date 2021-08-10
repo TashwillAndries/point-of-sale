@@ -2,7 +2,7 @@ import hmac
 
 from flask import *
 from flask_mail import Mail, Message
-from flask_cors import  CORS
+from flask_jwt import JWT, jwt_required, current_identity
 from smtplib import SMTPRecipientsRefused
 from flask_cors import CORS
 import sqlite3
@@ -109,6 +109,11 @@ mail = Mail(app)
 jwt = JWT(app, authenticate, identity)
 CORS(app)
 
+# protected route
+@app.route('/protected')
+@jwt_required()
+def protected():
+    return '%s' % current_identity
 
 # route to register users
 @app.route('/user-registration/', methods=['POST'])
@@ -143,6 +148,7 @@ def user_registration():
 
 # protected route that creates products
 @app.route('/products-create/', methods=['POST'])
+@jwt_required()
 def products_create():
     response = {}
     database = Database()
@@ -180,6 +186,7 @@ def get_products():
 
 # route to edit products
 @app.route('/edit-product/<int:product_id>/', methods=['PUT'])
+@jwt_required()
 def edit_product(product_id):
     response = {}
 
@@ -248,6 +255,7 @@ def edit_product(product_id):
 
 # route that deletes a single product
 @app.route("/delete-product/<int:product_id>")
+@jwt_required()
 def delete_post(product_id):
     response = {}
     database = Database()
@@ -261,6 +269,7 @@ def delete_post(product_id):
 
 # route that gets a single product by its ID
 @app.route('/get-product/<int:product_id>/', methods=["GET"])
+@jwt_required()
 def get_post(product_id):
     response = {}
     database = Database()
