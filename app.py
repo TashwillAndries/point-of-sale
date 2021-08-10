@@ -1,9 +1,9 @@
 import hmac
 
 from flask import *
-from flask_jwt import JWT, jwt_required, current_identity
 from flask_mail import Mail, Message
 from smtplib import SMTPRecipientsRefused
+from flask_cors import CORS
 import sqlite3
 
 
@@ -105,7 +105,7 @@ app.config['MAIL_PASSWORD'] = 'justtesting'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
-jwt = JWT(app, authenticate, identity)
+CORS(app)
 
 
 # route to register users
@@ -139,16 +139,8 @@ def user_registration():
         return response
 
 
-# protected route
-@app.route('/protected')
-@jwt_required()
-def protected():
-    return '%s' % current_identity
-
-
 # protected route that creates products
 @app.route('/products-create/', methods=['POST'])
-@jwt_required()
 def products_create():
     response = {}
     database = Database()
@@ -186,7 +178,6 @@ def get_products():
 
 # route to edit products
 @app.route('/edit-product/<int:product_id>/', methods=['PUT'])
-@jwt_required()
 def edit_product(product_id):
     response = {}
 
@@ -255,7 +246,6 @@ def edit_product(product_id):
 
 # route that deletes a single product
 @app.route("/delete-product/<int:product_id>")
-@jwt_required()
 def delete_post(product_id):
     response = {}
     database = Database()
