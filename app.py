@@ -4,7 +4,7 @@ from flask import *
 from flask_mail import Mail, Message
 from flask_jwt import JWT, jwt_required, current_identity
 from smtplib import SMTPRecipientsRefused
-from flask_cors import cross_origin
+from flask_cors import CORS
 import sqlite3
 
 
@@ -107,7 +107,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 jwt = JWT(app, authenticate, identity)
-# CORS(app)
+CORS(app)
 # cors = CORS(app, resources={
 #     r"/*": {
 #         "origin": "*"
@@ -118,14 +118,12 @@ jwt = JWT(app, authenticate, identity)
 # protected route
 @app.route('/protected')
 @jwt_required()
-@cross_origin()
 def protected():
     return '%s' % current_identity
 
 
 # route to register users
 @app.route('/user-registration/', methods=['POST'])
-@cross_origin()
 def user_registration():
     response = {}
     db = Database()
@@ -158,7 +156,6 @@ def user_registration():
 # protected route that creates products
 @app.route('/products-create/', methods=['POST'])
 @jwt_required()
-@cross_origin()
 def products_create():
     response = {}
     database = Database()
@@ -183,7 +180,6 @@ def products_create():
 
 # route to show all the products
 @app.route('/get-products/', methods=['GET'])
-@cross_origin()
 def get_products():
     response = {}
     database = Database()
@@ -198,7 +194,6 @@ def get_products():
 # route to edit products
 @app.route('/edit-product/<int:product_id>/', methods=['PUT'])
 @jwt_required()
-@cross_origin()
 def edit_product(product_id):
     response = {}
 
@@ -268,7 +263,6 @@ def edit_product(product_id):
 # route that deletes a single product
 @app.route("/delete-product/<int:product_id>")
 @jwt_required()
-@cross_origin()
 def delete_post(product_id):
     response = {}
     database = Database()
@@ -283,7 +277,6 @@ def delete_post(product_id):
 # route that gets a single product by its ID
 @app.route('/get-product/<int:product_id>/', methods=["GET"])
 @jwt_required()
-@cross_origin()
 def get_post(product_id):
     response = {}
     database = Database()
