@@ -123,7 +123,7 @@ def protected():
 
 
 # route to register users
-@app.route('/user-registration/', methods=['POST'])
+@app.route('/user-registration/', methods=["GET", 'POST'])
 def user_registration():
     response = {}
     db = Database()
@@ -147,6 +147,11 @@ def user_registration():
             response["message"] = 'Success'
             response["status_code"] = 201
             return response
+        else:
+            response["message"] = 'failed'
+            response["status_code"] = 401
+            return response
+
     except SMTPRecipientsRefused:
         response['message'] = "Please enter a valid email address"
         response['status_code'] = 400
