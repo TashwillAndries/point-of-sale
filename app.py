@@ -2,6 +2,7 @@ import hmac
 
 from flask import *
 from flask_mail import Mail, Message
+from flask_cors import  CORS
 from smtplib import SMTPRecipientsRefused
 from flask_cors import CORS
 import sqlite3
