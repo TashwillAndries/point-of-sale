@@ -105,6 +105,7 @@ app.config['MAIL_PASSWORD'] = 'justtesting'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
+jwt = JWT(app, authenticate, identity)
 CORS(app)
 
 
