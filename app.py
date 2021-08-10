@@ -108,6 +108,12 @@ app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 jwt = JWT(app, authenticate, identity)
 CORS(app)
+cors = CORS(app, resources={
+    r"/*": {
+        "origin": "*"
+    }
+})
+
 
 # protected route
 @app.route('/protected')
