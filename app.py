@@ -7,6 +7,8 @@ from smtplib import SMTPRecipientsRefused
 from flask_cors import CORS
 import sqlite3
 
+import cloudinary
+import cloudinary.uploader
 
 class User(object):
     def __init__(self, id, username, password):
@@ -74,7 +76,8 @@ def init_products_table():
                      "description TEXT NOT NULL,"
                      "quantity TEXT NOT NULL,"
                      "price TEXT NOT NULL,"
-                     "type TEXT NOT NULL, "
+                     "type TEXT NOT NULL,"
+                     "picture TEXT NOT NULL, "
                      "total TEXT NOT NULL)")
     print("shopping table created successfully")
 
@@ -166,8 +169,9 @@ def products_create():
         type = request.form['type']
         total = int(price) * int(quantity)
 
-        query = "INSERT INTO cart (item_name, description, quantity,price, type, total) VALUES(?, ?, ?, ?, ?, ?)"
-        values = item_name, description, quantity, price, type, total
+        query = "INSERT INTO cart (item_name, description, quantity,price, type, picture," \
+                " total) VALUES(?, ?, ?, ?, ?, ?, ?)"
+        values = item_name, description, quantity, price, type, upload_file(), total
 
         database.sending_to_database(query, values)
         response['message'] = "item added successfully"
@@ -269,6 +273,20 @@ def delete_post(product_id):
     response['status_code'] = 200
     response['message'] = "product deleted successfully."
     return response
+
+
+def upload_file():
+    app.logger.info('in upload route')
+    cloudinary.config(cloud_name='dtjgqnwbk', api_key='547853474672121',
+                      api_secret='fXXsay0Fd5RmSPMS5TwZUaJFsRk')
+    upload_result = None
+    if request.method == 'POST' or request.method == 'PUT':
+        product_image = request.files['picture']
+        app.logger.info('%s file_to_upload', product_image)
+        if product_image:
+            upload_result = cloudinary.uploader.upload(product_image)
+            app.logger.info(upload_result)
+            return upload_result['url']
 
 
 # route that gets a single product by its ID
