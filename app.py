@@ -110,6 +110,7 @@ jwt = JWT(app, authenticate, identity)
 CORS(app)
 
 
+
 # protected route
 @app.route('/protected')
 @jwt_required()
@@ -125,12 +126,12 @@ def user_registration():
     try:
         if request.method == "POST":
 
-            first_name = request.json['first_name']
-            surname = request.json['last_name']
-            address = request.json['address']
-            email = request.json['email']
-            username = request.json['username']
-            password = request.json['password']
+            first_name = request.form['first_name']
+            surname = request.form['last_name']
+            address = request.form['address']
+            email = request.form['email']
+            username = request.form['username']
+            password = request.form['password']
 
             query = "INSERT INTO user (first_name,last_name,address,email,username,password) VALUES(?,?,?,?,?,?)"
             values = (first_name, surname, address, email, username, password)
