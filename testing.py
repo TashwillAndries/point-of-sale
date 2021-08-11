@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
         test = app.test_client(self)
         response = test.get('/user-registration/')
         status = response.status_code
-        self.assertEqual(status, 405)
+        self.assertEqual(status, 200)
 
     # check if responses is 200
     def test_products(self):
@@ -27,12 +27,12 @@ class Test(unittest.TestCase):
         test = app.test_client(self)
         response = test.get('/get-product/3/')
         status = response.status_code
-        self.assertEqual(status, 200)
+        self.assertEqual(status, 401)
 
     # check content type
     def test_type(self):
         test = app.test_client(self)
-        response = test.get('/get-products/')
+        response = test.get('/user-registration/')
         self.assertEqual(response.content_type, "application/json")
 
 

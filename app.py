@@ -108,11 +108,6 @@ app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 jwt = JWT(app, authenticate, identity)
 CORS(app)
-# cors = CORS(app, resources={
-#     r"/*": {
-#         "origin": "*"
-#     }
-# })
 
 
 # protected route
@@ -123,19 +118,19 @@ def protected():
 
 
 # route to register users
-@app.route('/user-registration/', methods=["GET", 'POST'])
+@app.route('/user-registration/', methods=['POST'])
 def user_registration():
     response = {}
     db = Database()
     try:
         if request.method == "POST":
 
-            first_name = request.form['first_name']
-            surname = request.form['last_name']
-            address = request.form['address']
-            email = request.form['email']
-            username = request.form['username']
-            password = request.form['password']
+            first_name = request.json['first_name']
+            surname = request.json['last_name']
+            address = request.json['address']
+            email = request.json['email']
+            username = request.json['username']
+            password = request.json['password']
 
             query = "INSERT INTO user (first_name,last_name,address,email,username,password) VALUES(?,?,?,?,?,?)"
             values = (first_name, surname, address, email, username, password)
@@ -146,10 +141,6 @@ def user_registration():
             mail.send(message)
             response["message"] = 'Success'
             response["status_code"] = 201
-            return response
-        else:
-            response["message"] = 'failed'
-            response["status_code"] = 401
             return response
 
     except SMTPRecipientsRefused:
