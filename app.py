@@ -162,11 +162,11 @@ def products_create():
 
     if request.method == "POST":
 
-        item_name = request.form['item_name']
-        description = request.form['description']
-        quantity = request.form['quantity']
-        price = request.form['price']
-        type = request.form['type']
+        item_name = request.json['item_name']
+        description = request.json['description']
+        quantity = request.json['quantity']
+        price = request.json['price']
+        type = request.json['type']
 
         query = "INSERT INTO cart (item_name, description, quantity, price, type, picture) Values(?,?,?,?,?,?)"
         values = item_name, description, quantity, price, type, upload_file()
