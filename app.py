@@ -167,9 +167,10 @@ def products_create():
         quantity = request.json['quantity']
         price = request.json['price']
         type = request.json['type']
+        picture = request.json['picture']
 
         query = "INSERT INTO cart (item_name, description, quantity, price, type, picture) Values(?,?,?,?,?,?)"
-        values = item_name, description, quantity, price, type, upload_file()
+        values = item_name, description, quantity, price, type, picture
 
         database.sending_to_database(query, values)
         response['message'] = "item added successfully"
