@@ -108,9 +108,10 @@ app.config['MAIL_USERNAME'] = 'justtotestmywork@gmail.com'
 app.config['MAIL_PASSWORD'] = 'justtesting'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
+app.config['CORS-HEADERS'] = ['Content-Type']
 mail = Mail(app)
 jwt = JWT(app, authenticate, identity)
-CORS(app)
+CORS(app, resources={r"/*":{"origins": "*"}})
 
 
 
