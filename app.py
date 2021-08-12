@@ -77,8 +77,7 @@ def init_products_table():
                      "quantity TEXT NOT NULL,"
                      "price TEXT NOT NULL,"
                      "type TEXT NOT NULL,"
-                     "picture TEXT NOT NULL, "
-                     "total TEXT NOT NULL)")
+                     "picture TEXT NOT NULL)")
     print("shopping table created successfully")
 
 
@@ -163,16 +162,14 @@ def products_create():
 
     if request.method == "POST":
 
-        item_name = request.json['item_name']
-        description = request.json['description']
-        quantity = request.json['quantity']
-        price = request.json['price']
-        type = request.json['type']
-        total = int(price) * int(quantity)
+        item_name = request.form['item_name']
+        description = request.form['description']
+        quantity = request.form['quantity']
+        price = request.form['price']
+        type = request.form['type']
 
-        query = "INSERT INTO cart (item_name, description, quantity,price, type, picture," \
-                " total) VALUES(?, ?, ?, ?, ?, ?, ?)"
-        values = item_name, description, quantity, price, type, upload_file(), total
+        query = "INSERT INTO cart (item_name, description, quantity, price, type, picture) Values(?,?,?,?,?,?)"
+        values = item_name, description, quantity, price, type, upload_file()
 
         database.sending_to_database(query, values)
         response['message'] = "item added successfully"
@@ -247,15 +244,6 @@ def edit_product(product_id):
                     cursor = conn.cursor()
                     cursor.execute("UPDATE cart SET type =? WHERE product_id =?",
                                    (put_data['type'], product_id))
-                    conn.commit()
-                    response['message'] = "Update was successful"
-                    response["status_code"] = 201
-            if incoming_data.get("total") is not None:
-                put_data["total"] = incoming_data.get("total")
-                with sqlite3.connect('shopping.db') as conn:
-                    cursor = conn.cursor()
-                    cursor.execute("UPDATE cart SET total =? WHERE product_id =?",
-                                   (put_data['total'], product_id))
                     conn.commit()
                     response['message'] = "Update was successful"
                     response["status_code"] = 201
