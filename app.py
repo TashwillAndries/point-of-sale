@@ -271,7 +271,7 @@ def upload_file():
                       api_secret='fXXsay0Fd5RmSPMS5TwZUaJFsRk')
     upload_result = None
     if request.method == 'POST' or request.method == 'PUT':
-        product_image = request.files['picture']
+        product_image = request.json['picture']
         app.logger.info('%s file_to_upload', product_image)
         if product_image:
             upload_result = cloudinary.uploader.upload(product_image)
